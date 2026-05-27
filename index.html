@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MLflow Demo — Alt Deck</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-2: #0a1630;
+      --panel: rgba(9, 21, 37, 0.74);
+      --panel-soft: rgba(255, 255, 255, 0.05);
+      --line: rgba(125, 211, 252, 0.18);
+      --text: #edf6ff;
+      --muted: #9eb3c7;
+      --cyan: #67e8f9;
+      --blue: #60a5fa;
+      --lime: #bef264;
+      --pink: #f9a8d4;
+      --amber: #facc15;
+      --coral: #fb7185;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top left, rgba(103, 232, 249, 0.14), transparent 24%),
+        radial-gradient(circle at 85% 12%, rgba(249, 168, 212, 0.18), transparent 24%),
+        linear-gradient(135deg, #020817 0%, #07111f 40%, #0d1f3d 100%);
+    }
+
+    .reveal {
+      font-family: "Aptos", "Segoe UI", sans-serif;
+      font-size: 34px;
+      color: var(--text);
+    }
+
+    .reveal .slides {
+      text-align: left;
+    }
+
+    .reveal .controls {
+      transform: scale(0.55);
+      transform-origin: bottom right;
+      right: 10px;
+      bottom: 12px;
+    }
+
+    .reveal .controls button {
+      color: var(--cyan);
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .reveal .controls button.enabled {
+      opacity: 0.95;
+    }
+
+    .reveal .progress span {
+      color: var(--cyan);
+      background: var(--cyan);
+    }
+
+    .reveal .slide-number {
+      right: 58px;
+      bottom: 24px;
+      color: rgba(237, 246, 255, 0.6);
+      background: transparent;
+      font-size: 0.42em;
+    }
+
+    .deck {
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 34px 48px 26px;
+      box-sizing: border-box;
+      gap: 18px;
+    }
+
+    .topline,
+    .footerline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.32em;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: rgba(237, 246, 255, 0.65);
+    }
+
+    .body {
+      min-height: 0;
+      display: grid;
+      gap: 18px;
+      align-content: stretch;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: max-content;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 0.28em;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+
+    .hero-grid,
+    .panel-grid,
+    .triptych,
+    .matrix-grid,
+    .path-grid {
+      display: grid;
+      gap: 18px;
+      min-height: 0;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+
+    .panel-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: minmax(0, 1fr);
+    }
+
+    .triptych {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .matrix-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .path-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: stretch;
+    }
+
+    .hero-panel,
+    .panel,
+    .lane,
+    .matrix-panel,
+    .path-step,
+    .callout {
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: var(--panel);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(16px);
+    }
+
+    .hero-panel,
+    .panel,
+    .lane,
+    .matrix-panel {
+      padding: 22px 24px;
+      box-sizing: border-box;
+    }
+
+    .hero-panel {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-panel::after {
+      content: "";
+      position: absolute;
+      inset: auto -90px -90px auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(96, 165, 250, 0.22), transparent 68%);
+      pointer-events: none;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-size: 1.12em;
+      line-height: 0.98;
+      font-weight: 800;
+      max-width: 14ch;
+    }
+
+    .hero-title .title-break {
+      display: block;
+    }
+
+    .hero-title .accent {
+      color: var(--cyan);
+    }
+
+    .hero-copy,
+    .panel-copy,
+    .lane-copy,
+    .list,
+    .matrix-copy,
+    .path-copy,
+    .callout {
+      font-size: 0.38em;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .hero-copy {
+      max-width: 42ch;
+      margin: 0;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .stat-pill {
+      padding: 10px 12px;
+      min-width: 104px;
+      border-radius: 20px;
+      background: var(--panel-soft);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .stat-pill strong {
+      display: block;
+      font-size: 0.78em;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-pill span {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.28em;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .panel {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .panel-kicker,
+    .lane-tag,
+    .matrix-kicker {
+      width: max-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.28em;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .panel-kicker,
+    .matrix-kicker {
+      color: #07111f;
+    }
+
+    .bg-cyan { background: var(--cyan); }
+    .bg-amber { background: var(--amber); }
+    .bg-pink { background: var(--pink); }
+    .bg-lime { background: var(--lime); }
+    .bg-coral { background: var(--coral); }
+
+    .panel-title,
+    .lane-title,
+    .matrix-title {
+      margin: 0;
+      font-size: 0.66em;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .panel-copy strong,
+    .lane-copy strong,
+    .matrix-copy strong,
+    .path-copy strong,
+    .callout strong {
+      color: var(--text);
+    }
+
+    .feature-list,
+    .list,
+    .mode-list {
+      margin: 0;
+      padding-left: 1.1em;
+    }
+
+    .feature-list li,
+    .list li,
+    .mode-list li {
+      margin-bottom: 0.38em;
+    }
+
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px 12px;
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .feature-list li {
+      padding: 9px 10px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.29em;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+
+    .feature-list code {
+      color: var(--cyan);
+      font-family: Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    .lane {
+      display: grid;
+      grid-template-rows: auto auto auto 1fr auto;
+      gap: 12px;
+    }
+
+    .lane-tag {
+      color: #07111f;
+    }
+
+    .lane-meta {
+      font-size: 0.3em;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .lane-foot {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 0.34em;
+      color: var(--text);
+    }
+
+    .mode-card {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 12px;
+    }
+
+    .mode-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mode-track {
+      font-size: 0.36em;
+      color: var(--text);
+    }
+
+    .mode-track code {
+      color: var(--cyan);
+      font-family: Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    .mode-chip {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 0.34em;
+      color: var(--text);
+    }
+
+    .matrix-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .definition-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .definition-card {
+      padding: 18px 20px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .definition-card p {
+      margin: 0;
+      font-size: 0.34em;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .matrix-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .matrix-card {
+      padding: 20px 22px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .matrix-head {
+      display: grid;
+      gap: 8px;
+    }
+
+    .matrix-head p {
+      margin: 0;
+      font-size: 0.34em;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .matrix-mode-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .matrix-mode-row {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.34em;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .matrix-mode-row strong {
+      color: var(--text);
+    }
+
+    .demo-launch {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      min-height: 0;
+      align-items: stretch;
+    }
+
+    .demo-launch .hero-panel {
+      grid-template-rows: auto auto auto;
+      align-content: center;
+    }
+
+    .demo-launch .hero-title {
+      max-width: 10ch;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 14px 12px;
+      font-size: 0.34em;
+    }
+
+    .matrix-table th,
+    .matrix-table td {
+      padding: 16px 18px;
+      border-radius: 18px;
+      vertical-align: top;
+    }
+
+    .matrix-table th {
+      background: rgba(96, 165, 250, 0.14);
+      color: var(--text);
+      text-align: left;
+      font-weight: 700;
+    }
+
+    .matrix-table td {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .matrix-table td strong {
+      color: var(--text);
+    }
+
+    .matrix-path {
+      display: grid;
+      gap: 8px;
+    }
+
+    .matrix-path-meta {
+      font-size: 0.88em;
+      color: var(--muted);
+    }
+
+    .matrix-path-copy {
+      margin: 0;
+      font-size: 0.94em;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .matrix-cell {
+      display: grid;
+      gap: 10px;
+    }
+
+    .matrix-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: max-content;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.76em;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .matrix-status::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .status-ok {
+      background: rgba(190, 242, 100, 0.1);
+      color: #d9f99d;
+      border: 1px solid rgba(190, 242, 100, 0.22);
+    }
+
+    .status-ok::before {
+      background: var(--lime);
+    }
+
+    .status-mid {
+      background: rgba(250, 204, 21, 0.1);
+      color: #fde68a;
+      border: 1px solid rgba(250, 204, 21, 0.22);
+    }
+
+    .status-mid::before {
+      background: var(--amber);
+    }
+
+    .status-no {
+      background: rgba(251, 113, 133, 0.1);
+      color: #fda4af;
+      border: 1px solid rgba(251, 113, 133, 0.22);
+    }
+
+    .status-no::before {
+      background: var(--coral);
+    }
+
+    .matrix-note {
+      margin: 0;
+      font-size: 0.92em;
+      line-height: 1.45;
+    }
+
+    .legend-list {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .legend-item {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.35em;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .legend-item strong {
+      color: var(--text);
+    }
+
+    .path-step {
+      padding: 20px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      position: relative;
+    }
+
+    .path-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -13px;
+      width: 24px;
+      height: 24px;
+      border-top: 2px solid rgba(237, 246, 255, 0.3);
+      border-right: 2px solid rgba(237, 246, 255, 0.3);
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .path-index {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      font-size: 0.36em;
+      font-weight: 800;
+      color: #07111f;
+    }
+
+    .callout {
+      padding: 18px 22px;
+      background: linear-gradient(135deg, rgba(103, 232, 249, 0.12), rgba(96, 165, 250, 0.08));
+      border: 1px solid rgba(103, 232, 249, 0.18);
+      color: var(--text);
+      font-size: 0.34em;
+    }
+
+    .accent-cyan { color: var(--cyan); }
+    .accent-amber { color: var(--amber); }
+    .accent-pink { color: var(--pink); }
+    .accent-lime { color: var(--lime); }
+
+    .neutral-kicker {
+      font-size: 0.28em;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(237, 246, 255, 0.72);
+    }
+
+    .agenda-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .agenda-item {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 18px;
+      padding: 8px 10px;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      align-items: start;
+      min-height: 0;
+    }
+
+    .agenda-index {
+      display: inline-grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(96, 165, 250, 0.12);
+      border: 1px solid rgba(96, 165, 250, 0.18);
+      color: var(--text);
+      font-size: 0.4em;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .agenda-content {
+      display: grid;
+      gap: 2px;
+    }
+
+    .agenda-title {
+      margin: 0;
+      font-size: 0.56em;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .agenda-copy {
+      margin: 0;
+      font-size: 0.35em;
+      line-height: 1.48;
+      color: var(--muted);
+    }
+
+    .component-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .component-card {
+      display: grid;
+      gap: 10px;
+      padding: 20px 22px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .component-card .panel-title {
+      font-size: 0.62em;
+    }
+
+    .component-card .panel-copy {
+      font-size: 0.34em;
+      line-height: 1.5;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 18px;
+    }
+
+    .timeline-note {
+      margin: 0;
+      max-width: 72ch;
+      font-size: 0.36em;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .timeline-track {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .timeline-phase {
+      display: grid;
+      gap: 14px;
+      padding: 20px 22px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+    }
+
+    .timeline-phase:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -12px;
+      width: 22px;
+      height: 22px;
+      border-top: 2px solid rgba(237, 246, 255, 0.22);
+      border-right: 2px solid rgba(237, 246, 255, 0.22);
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .stage-tag {
+      display: inline-flex;
+      align-items: center;
+      width: max-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.28em;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #07111f;
+    }
+
+    .stage-exp { background: rgba(237, 246, 255, 0.14); color: var(--text); }
+    .stage-val { background: rgba(237, 246, 255, 0.14); color: var(--text); }
+    .stage-prod { background: rgba(237, 246, 255, 0.14); color: var(--text); }
+
+    .timeline-meta {
+      font-size: 0.3em;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(237, 246, 255, 0.68);
+    }
+
+    .timeline-title {
+      margin: 0;
+      font-size: 0.58em;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .timeline-copy {
+      margin: 0;
+      font-size: 0.35em;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .timeline-steps {
+      margin: 0;
+      padding-left: 1.1em;
+      font-size: 0.33em;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .timeline-steps li + li {
+      margin-top: 0.24em;
+    }
+
+    .mode-local-tag { background: #60a5fa; }
+    .mode-shared-tag { background: #a3e635; }
+    .mode-dbx-tag { background: #fb7185; }
+
+    .slide-modes .lane-tag {
+      color: #07111f;
+    }
+
+    .slide-matrix .matrix-table th:first-child,
+    .slide-matrix .matrix-table td:first-child {
+      width: 25%;
+    }
+
+    .slide-matrix .matrix-table {
+      table-layout: fixed;
+    }
+
+    .slide-matrix .matrix-table th,
+    .slide-matrix .matrix-table td {
+      width: 25%;
+    }
+
+    .slide-matrix .matrix-path {
+      gap: 10px;
+    }
+
+    .slide-matrix .matrix-path strong {
+      display: inline-flex;
+      align-items: center;
+      width: max-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.9em;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #07111f;
+    }
+
+    .slide-matrix .matrix-path.exp strong,
+    .slide-matrix .matrix-path.val strong,
+    .slide-matrix .matrix-path.prod strong {
+      background: rgba(237, 246, 255, 0.14);
+      color: var(--text);
+    }
+
+    .slide-matrix .matrix-table th.col-local {
+      background: rgba(96, 165, 250, 0.18);
+    }
+
+    .slide-matrix .matrix-table th.col-shared {
+      background: rgba(163, 230, 53, 0.18);
+    }
+
+    .slide-matrix .matrix-table th.col-dbx {
+      background: rgba(251, 113, 133, 0.18);
+    }
+
+    .slide-hero .body {
+      align-content: center;
+    }
+
+    .slide-hero .hero-title {
+      font-size: 0.98em;
+      line-height: 1.02;
+      max-width: none;
+    }
+
+    .slide-agenda .body,
+    .slide-components-overview .body,
+    .slide-project-stages .body,
+    .slide-modes .body,
+    .slide-matrix .body {
+      align-content: start;
+      gap: 14px;
+    }
+
+    .slide-agenda .deck,
+    .slide-components-overview .deck,
+    .slide-project-stages .deck,
+    .slide-modes .deck,
+    .slide-matrix .deck {
+      margin-top: -10px;
+      padding-top: 24px;
+      padding-bottom: 8px;
+      gap: 14px;
+    }
+
+    .slide-agenda .deck {
+      padding-top: 4px;
+      padding-bottom: 0;
+      gap: 6px;
+    }
+
+    .slide-agenda .body {
+      display: block;
+    }
+
+    .slide-agenda .agenda-stack {
+      align-self: start;
+      height: auto;
+    }
+
+    .slide-agenda .agenda-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 6px 10px;
+      gap: 8px;
+    }
+
+    .slide-agenda .agenda-index {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      font-size: 0.22em;
+    }
+
+    .slide-agenda .agenda-title {
+      margin: 0 !important;
+      font-size: 0.34em;
+      line-height: 1.15;
+    }
+
+    .slide-agenda .agenda-copy {
+      margin: 0 !important;
+      font-size: 0.23em;
+      line-height: 1.18;
+    }
+
+    .slide-agenda .agenda-content {
+      gap: 1px;
+    }
+
+    .matrix-header-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: max-content;
+      min-width: 170px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 1.1em;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #07111f;
+    }
+
+    .slide-components-overview .feature-list {
+      gap: 6px 8px;
+    }
+
+    .slide-components-overview .feature-list li {
+      padding: 5px 8px;
+      font-size: 0.24em;
+      line-height: 1.2;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="slide-hero">
+        <div class="deck">
+          <div class="topline">
+            <span>MLflow Demo</span>
+            <span>01</span>
+          </div>
+
+          <div class="body">
+            <div class="hero-grid">
+              <div class="hero-panel">
+                <div class="eyebrow">Un même socle pour tout le cycle ML</div>
+                <h1 class="hero-title">MLflow pour explorer,<span class="title-break"><span class="accent">déployer, monitorer.</span></span></h1>
+                <p class="hero-copy">Un même fil conducteur du run local au serving et au suivi en production.</p>
+
+                <div class="hero-stats">
+                  <div class="stat-pill"><strong>9</strong><span>Notebooks</span></div>
+                  <div class="stat-pill"><strong>3</strong><span>Modes</span></div>
+                  <div class="stat-pill"><strong>3</strong><span>Paliers cumulés</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footerline">
+            <span>MLflow Demo</span>
+            <span>Avril 2026</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide-agenda">
+        <div class="deck">
+          <div class="topline">
+            <span>Au programme</span>
+            <span>02</span>
+          </div>
+
+          <div class="body">
+            <div class="eyebrow">Agenda de la session</div>
+            <div class="agenda-stack">
+              <div class="agenda-item">
+                <div class="agenda-index">01</div>
+                <div class="agenda-content">
+                  <p class="agenda-title">Ce que couvre MLflow</p>
+                  <p class="agenda-copy">Tracking, Models, Registry et Serving sur un même cas d’usage.</p>
+                </div>
+              </div>
+              <div class="agenda-item">
+                <div class="agenda-index">02</div>
+                <div class="agenda-content">
+                  <p class="agenda-title">Étapes possibles d’un projet ML</p>
+                  <p class="agenda-copy">EXP 01 à 05, VAL 06 à 07, PROD 08 à 09: des étapes successives du projet.</p>
+                </div>
+              </div>
+              <div class="agenda-item">
+                <div class="agenda-index">03</div>
+                <div class="agenda-content">
+                  <p class="agenda-title">Trois modes d’exécution distincts</p>
+                  <p class="agenda-copy">Local, serveur partagé, Databricks: mêmes usages, contraintes différentes.</p>
+                </div>
+              </div>
+              <div class="agenda-item">
+                <div class="agenda-index">04</div>
+                <div class="agenda-content">
+                  <p class="agenda-title">Comparer ce qui change selon le mode</p>
+                  <p class="agenda-copy">Une matrice simple pour voir ce qui change selon le mode.</p>
+                </div>
+              </div>
+              <div class="agenda-item">
+                <div class="agenda-index">05</div>
+                <div class="agenda-content">
+                  <p class="agenda-title">Démo guidée</p>
+                  <p class="agenda-copy">Dérouler les notebooks clés de l’exploration à la mise en service.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footerline">
+            <span>Session d’introduction</span>
+            <span>Agenda</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide-components-overview">
+        <div class="deck">
+          <div class="topline">
+            <span>MLflow</span>
+            <span>03</span>
+          </div>
+
+          <div class="body">
+            <div class="eyebrow">4 composants et des dizaines de cas d’usage</div>
+            <div class="component-grid">
+              <div class="component-card">
+                <div class="neutral-kicker">01 · Tracking</div>
+                <p class="panel-title">Tracer les expériences.</p>
+                <p class="panel-copy">Paramètres, métriques, artefacts, datasets: tout ce qu’un run doit laisser derrière lui pour être relu et comparé.</p>
+              </div>
+              <div class="component-card">
+                <div class="neutral-kicker">02 · Models</div>
+                <p class="panel-title">Un format unifié.</p>
+                <p class="panel-copy">Même logique de packaging pour <strong>sklearn</strong>, <strong>PyTorch</strong>, <strong>XGBoost</strong> ou des pipelines plus personnalisés.</p>
+              </div>
+              <div class="component-card">
+                <div class="neutral-kicker">03 · Registry</div>
+                <p class="panel-title">Versionner et promouvoir.</p>
+                <p class="panel-copy">Passer du notebook solo à une mécanique de gouvernance avec validation, versionnage et promotion.</p>
+              </div>
+              <div class="component-card">
+                <div class="neutral-kicker">04 · Serving</div>
+                <p class="panel-title">Aller jusqu’à l’usage.</p>
+                <p class="panel-copy">Exposer un modèle, servir une API, instrumenter les entrées et préparer le monitoring.</p>
+              </div>
+            </div>
+
+            <ul class="feature-list">
+              <li><code>mlflow.log_params()</code> et <code>log_metrics()</code></li>
+              <li><code>mlflow.autolog()</code> pour le logging automatique</li>
+              <li><code>mlflow.data.from_pandas()</code> pour le dataset</li>
+            </ul>
+          </div>
+
+          <div class="footerline">
+            <span>Tracking / Models / Registry / Serving</span>
+            <span>Fonctionnalités montrées</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide-project-stages">
+        <div class="deck">
+          <div class="topline">
+            <span>Étapes</span>
+            <span>04</span>
+          </div>
+
+          <div class="body">
+            <div class="eyebrow">Étapes potentielles d’un projet ML complet</div>
+            <div class="timeline">
+              <div class="timeline-track">
+                <div class="timeline-phase">
+                  <div class="stage-tag stage-exp">EXP</div>
+                  <div class="timeline-meta">Notebooks 01 → 05</div>
+                  <p class="timeline-title">Explorer, entraîner, comparer.</p>
+                  <p class="timeline-copy">Le socle d’un projet ML: comprendre les données, poser des baselines, enrichir les features, tuner et sélectionner.</p>
+                  <ul class="timeline-steps">
+                    <li>01 à 03: exploration, premiers modèles, features</li>
+                    <li>04 à 05: tuning, comparaison, sélection</li>
+                  </ul>
+                </div>
+                <div class="timeline-phase">
+                  <div class="stage-tag stage-val">VAL</div>
+                  <div class="timeline-meta">Notebooks 06 → 07</div>
+                  <p class="timeline-title">Valider et promouvoir.</p>
+                  <p class="timeline-copy">Une étape dédiée à la validation du modèle retenu, puis à sa promotion dans le registry.</p>
+                  <ul class="timeline-steps">
+                    <li>06: validation et quality checks</li>
+                    <li>07: versionnage, registry, promotion</li>
+                  </ul>
+                </div>
+                <div class="timeline-phase">
+                  <div class="stage-tag stage-prod">PROD</div>
+                  <div class="timeline-meta">Notebooks 08 → 09</div>
+                  <p class="timeline-title">Servir et monitorer.</p>
+                  <p class="timeline-copy">La phase d’usage réel: exposition du modèle, suivi des prédictions et préparation du réentraînement.</p>
+                  <ul class="timeline-steps">
+                    <li>08: serving et inférence</li>
+                    <li>09: monitoring, drift, retraining</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footerline">
+            <span>EXP / VAL / PROD</span>
+            <span>Étapes du projet ML</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide-modes">
+        <div class="deck">
+          <div class="topline">
+            <span>Modes</span>
+            <span>05</span>
+          </div>
+
+          <div class="body">
+            <div class="eyebrow">3 façons de travailler avec MLflow</div>
+            <div class="triptych">
+              <div class="lane mode-card">
+                <div class="mode-header">
+                  <div class="lane-tag mode-local-tag">Local</div>
+                </div>
+                <div class="mode-track">UI: <code>http://localhost:5000</code></div>
+                <ul class="mode-list lane-copy">
+                  <li>Installation simple, sans service séparé à lancer</li>
+                  <li>Traiter et organiser les runs d’exploration simplement</li>
+                  <li>UI locale immédiate</li>
+                  <li>Idéal pour prise en main, POC et démo offline</li>
+                </ul>
+                <div class="mode-chip">POC solo, apprentissage, démo offline.</div>
+              </div>
+
+              <div class="lane mode-card">
+                <div class="mode-header">
+                  <div class="lane-tag mode-shared-tag">Serveur partagé</div>
+                </div>
+                <div class="mode-track">UI: <code>http://&lt;host&gt;:&lt;port&gt;</code></div>
+                <ul class="mode-list lane-copy">
+                  <li>Déploiement simple via Docker Compose</li>
+                  <li>MLflow + PostgreSQL gérés dans la stack</li>
+                  <li>Runs visibles par toute l’équipe</li>
+                  <li>Registry partagée</li>
+                </ul>
+                <div class="mode-chip">Formation de groupe, projets d’équipe, partage des runs.</div>
+              </div>
+
+              <div class="lane mode-card">
+                <div class="mode-header">
+                  <div class="lane-tag mode-dbx-tag">Databricks</div>
+                </div>
+                <div class="mode-track">UI: <code>https://&lt;workspace&gt;</code></div>
+                <ul class="mode-list lane-copy">
+                  <li>Workspace managé Azure Databricks</li>
+                  <li>Unity Catalog et gouvernance</li>
+                  <li>Serving natif + scaling</li>
+                  <li>Monitoring drift données et performance modèle</li>
+                </ul>
+                <div class="mode-chip">Production, gouvernance, contexte client ou plateforme.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footerline">
+            <span>Local / Serveur / Databricks</span>
+            <span>Même démo, contextes différents</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide-matrix">
+        <div class="deck">
+          <div class="topline">
+            <span>Matrice</span>
+            <span>06</span>
+          </div>
+
+          <div class="body">
+            <div class="eyebrow">Fonctionnalités différentes selon le mode</div>
+            <div class="matrix-grid">
+              <div class="matrix-panel">
+                <table class="matrix-table">
+                  <thead>
+                    <tr>
+                      <th>Etape</th>
+                      <th class="col-local"><span class="matrix-header-chip mode-local-tag">Local</span></th>
+                      <th class="col-shared"><span class="matrix-header-chip mode-shared-tag">Serveur</span></th>
+                      <th class="col-dbx"><span class="matrix-header-chip mode-dbx-tag">Databricks</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="matrix-path exp">
+                          <strong>EXP</strong>
+                          <div class="matrix-path-meta">01 → 05</div>
+                          <p class="matrix-path-copy">Explorer, profiler, entraîner et comparer.</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="matrix-cell">
+                          <span class="matrix-status status-ok">OK</span>
+                          <p class="matrix-note">Tracking local, autolog et UI immédiate.</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="matrix-cell">
+                          <span class="matrix-status status-ok">OK</span>
+                          <p class="matrix-note">Runs partagés et visibles dans une UI commune.</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="matrix-cell">
+                          <span class="matrix-status status-ok">OK</span>
+                          <p class="matrix-note">Workspace managé et gouvernance native.</p>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="matrix-path val">
+                          <strong>VAL</strong>
+                          <div class="matrix-path-meta">06 → 07</div>
+                          <p class="matrix-path-copy">Valider, versionner, partager et promouvoir.</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="matrix-cell">
+                          <span class="matrix-status status-mid">Partiel</span>
+                          <p class="matrix-note">Registry locale utile pour un POC structuré, mais peu collaborative.</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="matrix-cell">
+                          <span class="matrix-status status-ok">OK</span>
+                          <p class="matrix-note">Registry partagée pour travailler à plusieurs.</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="matrix-cell">
+                          <span class="matrix-status status-ok">OK</span>
+                          <p class="matrix-note">Gouvernance plus outillée et plus robuste.</p>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="matrix-path prod">
+                          <strong>PROD</strong>
+                          <div class="matrix-path-meta">08 → 09</div>
+                          <p class="matrix-path-copy">Servir, monitorer et préparer le réentraînement.</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="matrix-cell">
+                          <span class="matrix-status status-no">Limite</span>
+                          <p class="matrix-note">Serving local possible, mais monitoring et exploitation restent très limités.</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="matrix-cell">
+                          <span class="matrix-status status-mid">Partiel</span>
+                          <p class="matrix-note">Serving faisable, plus artisanal à opérer.</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="matrix-cell">
+                          <span class="matrix-status status-ok">OK</span>
+                          <p class="matrix-note">Terrain naturel pour serving et monitoring.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="footerline">
+            <span>Vue d’ensemble</span>
+            <span>Compatibilité et limites</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="deck">
+          <div class="topline">
+            <span>Démarrage</span>
+            <span>07</span>
+          </div>
+
+          <div class="body">
+            <div class="eyebrow">C’est parti</div>
+            <div class="demo-launch">
+              <div class="hero-panel">
+                <h1 class="hero-title">On lance la <span class="accent">démo</span>.</h1>
+                <p class="hero-copy">Même dataset, même fil rouge, et davantage de capacités à chaque étape du parcours MLflow.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="footerline">
+            <span>Notebook-first</span>
+            <span>Démo pratique</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      controls: true,
+      progress: true,
+      slideNumber: 'c/t',
+      transition: 'convex',
+      backgroundTransition: 'fade',
+      width: 1280,
+      height: 720,
+      margin: 0.04,
+      minScale: 0.82,
+      maxScale: 1.18,
+    });
+  </script>
+</body>
+</html>
