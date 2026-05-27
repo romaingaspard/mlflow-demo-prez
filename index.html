@@ -26,7 +26,8 @@
     }
 
     html,
-    body {
+    body,
+    .reveal-viewport {
       width: 100%;
       height: 100%;
       margin: 0;
@@ -39,12 +40,18 @@
 
     .reveal {
       font-family: "Aptos", "Segoe UI", sans-serif;
-      font-size: 34px;
+      font-size: 37px;
       color: var(--text);
     }
 
     .reveal .slides {
       text-align: left;
+      height: 100%;
+    }
+
+    .reveal .slides section {
+      height: 100%;
+      padding: 0;
     }
 
     .reveal .controls {
@@ -81,9 +88,9 @@
       height: 100%;
       display: grid;
       grid-template-rows: auto 1fr auto;
-      padding: 34px 48px 26px;
+      padding: 26px 36px 18px;
       box-sizing: border-box;
-      gap: 18px;
+      gap: 16px;
     }
 
     .topline,
@@ -102,6 +109,17 @@
       display: grid;
       gap: 18px;
       align-content: stretch;
+    }
+
+    .hero-grid,
+    .agenda-stack,
+    .component-grid,
+    .timeline-track,
+    .triptych,
+    .matrix-grid,
+    .demo-launch {
+      width: 100%;
+      margin: 0 auto;
     }
 
     .eyebrow {
@@ -180,6 +198,7 @@
       gap: 18px;
       overflow: hidden;
       position: relative;
+      min-height: 100%;
     }
 
     .hero-panel::after {
@@ -198,7 +217,7 @@
       font-size: 1.12em;
       line-height: 0.98;
       font-weight: 800;
-      max-width: 14ch;
+      max-width: 16ch;
     }
 
     .hero-title .title-break {
@@ -375,6 +394,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      font-size: 0.36em;
     }
 
     .mode-track {
@@ -491,26 +511,26 @@
     .matrix-table {
       width: 100%;
       border-collapse: separate;
-      border-spacing: 14px 12px;
-      font-size: 0.34em;
+      border-spacing: 12px 12px;
+      font-size: 0.36em;
+      table-layout: fixed;
     }
 
     .matrix-table th,
     .matrix-table td {
-      padding: 16px 18px;
-      border-radius: 18px;
-      vertical-align: top;
+      padding: 0;
+      vertical-align: middle;
     }
 
     .matrix-table th {
-      background: rgba(96, 165, 250, 0.14);
+      background: transparent;
       color: var(--text);
-      text-align: left;
+      text-align: center;
       font-weight: 700;
     }
 
     .matrix-table td {
-      background: rgba(255, 255, 255, 0.05);
+      background: transparent;
       color: var(--muted);
       line-height: 1.5;
     }
@@ -521,24 +541,46 @@
 
     .matrix-path {
       display: grid;
-      gap: 8px;
+      gap: 12px;
+      min-height: 0;
+      padding: 12px 14px;
+      border-radius: 22px;
+      background: transparent;
+      border: none;
+      align-content: center;
+      box-sizing: border-box;
     }
 
     .matrix-path-meta {
-      font-size: 0.88em;
-      color: var(--muted);
+      font-size: 1.1em;
+      font-weight: 600;
+      color: var(--cyan);
     }
 
     .matrix-path-copy {
       margin: 0;
-      font-size: 0.94em;
-      line-height: 1.45;
-      color: var(--muted);
+      font-size: 0.95em;
+      line-height: 1.35;
+      color: var(--text);
     }
 
     .matrix-cell {
       display: grid;
-      gap: 10px;
+      grid-template-rows: auto 1fr;
+      gap: 6px;
+      height: 100%;
+      min-height: 90px;
+      padding: 12px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      box-sizing: border-box;
+    }
+
+    .cell-ok,
+    .cell-mid,
+    .cell-no {
+      /* Keep cells visually neutral, colors are now only in the status tags */
     }
 
     .matrix-status {
@@ -594,8 +636,10 @@
 
     .matrix-note {
       margin: 0;
-      font-size: 0.92em;
-      line-height: 1.45;
+      font-size: 0.82em;
+      line-height: 1.4;
+      color: var(--text);
+      align-self: center;
     }
 
     .legend-list {
@@ -790,19 +834,23 @@
     .stage-tag {
       display: inline-flex;
       align-items: center;
-      width: max-content;
-      padding: 6px 10px;
+      justify-content: center;
+      width: 76px;
+      padding: 6px 0;
       border-radius: 999px;
       font-size: 0.28em;
       font-weight: 800;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: #07111f;
+      box-sizing: border-box;
+      text-align: center;
     }
 
-    .stage-exp { background: rgba(237, 246, 255, 0.14); color: var(--text); }
-    .stage-val { background: rgba(237, 246, 255, 0.14); color: var(--text); }
-    .stage-prod { background: rgba(237, 246, 255, 0.14); color: var(--text); }
+    .stage-exp, .stage-val, .stage-prod {
+      background: var(--cyan) !important;
+      color: #07111f !important;
+    }
 
     .timeline-meta {
       font-size: 0.3em;
@@ -860,7 +908,7 @@
     }
 
     .slide-matrix .matrix-path {
-      gap: 10px;
+      gap: 4px;
     }
 
     .slide-matrix .matrix-path strong {
@@ -875,11 +923,19 @@
       color: #07111f;
     }
 
-    .slide-matrix .matrix-path.exp strong,
-    .slide-matrix .matrix-path.val strong,
+    .slide-matrix .matrix-path.exp strong {
+      background: var(--cyan);
+      color: #07111f;
+    }
+
+    .slide-matrix .matrix-path.val strong {
+      background: var(--cyan);
+      color: #07111f;
+    }
+
     .slide-matrix .matrix-path.prod strong {
-      background: rgba(237, 246, 255, 0.14);
-      color: var(--text);
+      background: var(--cyan);
+      color: #07111f;
     }
 
     .slide-matrix .matrix-table th.col-local {
@@ -895,13 +951,41 @@
     }
 
     .slide-hero .body {
-      align-content: center;
+      align-content: stretch;
+      justify-content: stretch;
+    }
+
+    .slide-hero .hero-grid {
+      height: 100%;
+    }
+
+    .slide-hero .hero-panel {
+      padding: 34px 38px;
     }
 
     .slide-hero .hero-title {
-      font-size: 0.98em;
+      font-size: 1.26em;
       line-height: 1.02;
       max-width: none;
+    }
+
+    .slide-hero .hero-copy {
+      font-size: 0.48em;
+      line-height: 1.42;
+      max-width: 40ch;
+    }
+
+    .slide-hero .stat-pill {
+      min-width: 142px;
+      padding: 14px 16px;
+    }
+
+    .slide-hero .stat-pill strong {
+      font-size: 0.92em;
+    }
+
+    .slide-hero .stat-pill span {
+      font-size: 0.32em;
     }
 
     .slide-agenda .body,
@@ -918,55 +1002,58 @@
     .slide-project-stages .deck,
     .slide-modes .deck,
     .slide-matrix .deck {
-      margin-top: -10px;
-      padding-top: 24px;
-      padding-bottom: 8px;
+      margin-top: 0;
+      padding-top: 22px;
+      padding-bottom: 14px;
       gap: 14px;
     }
 
     .slide-agenda .deck {
-      padding-top: 4px;
-      padding-bottom: 0;
-      gap: 6px;
+      padding-top: 22px;
+      padding-bottom: 14px;
+      gap: 14px;
     }
 
     .slide-agenda .body {
-      display: block;
+      display: grid;
+      align-content: stretch;
     }
 
     .slide-agenda .agenda-stack {
-      align-self: start;
-      height: auto;
+      align-self: stretch;
+      gap: 14px;
     }
 
     .slide-agenda .agenda-item {
-      display: flex;
-      align-items: flex-start;
-      padding: 6px 10px;
-      gap: 8px;
+      display: grid;
+      grid-template-columns: 78px 1fr;
+      align-items: center;
+      min-height: 0;
+      padding: 12px 14px;
+      gap: 14px;
     }
 
     .slide-agenda .agenda-index {
-      width: 28px;
-      height: 28px;
-      border-radius: 10px;
-      font-size: 0.22em;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      font-size: 0.34em;
     }
 
     .slide-agenda .agenda-title {
       margin: 0 !important;
-      font-size: 0.34em;
+      font-size: 0.5em;
       line-height: 1.15;
     }
 
     .slide-agenda .agenda-copy {
       margin: 0 !important;
-      font-size: 0.23em;
-      line-height: 1.18;
+      font-size: 0.32em;
+      line-height: 1.34;
     }
 
     .slide-agenda .agenda-content {
-      gap: 1px;
+      gap: 6px;
     }
 
     .matrix-header-chip {
@@ -982,16 +1069,78 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: #07111f;
+      margin: 0 auto;
+    }
+
+    .slide-components-overview .component-grid {
+      gap: 20px;
+    }
+
+    .slide-components-overview .component-card {
+      min-height: 220px;
+      padding: 24px 26px;
+    }
+
+    .slide-components-overview .component-card .panel-title {
+      font-size: 0.72em;
+    }
+
+    .slide-components-overview .component-card .panel-copy {
+      font-size: 0.38em;
+      line-height: 1.46;
     }
 
     .slide-components-overview .feature-list {
-      gap: 6px 8px;
+      display: none;
     }
 
-    .slide-components-overview .feature-list li {
-      padding: 5px 8px;
-      font-size: 0.24em;
-      line-height: 1.2;
+    .slide-project-stages .timeline-phase,
+    .slide-modes .lane {
+      min-height: 100%;
+      padding: 24px 26px;
+    }
+
+    .slide-project-stages .timeline-title {
+      font-size: 0.66em;
+    }
+
+    .slide-project-stages .timeline-copy,
+    .slide-project-stages .timeline-steps,
+    .slide-modes .mode-track,
+    .slide-modes .mode-list,
+    .slide-modes .mode-chip {
+      font-size: 0.38em;
+      line-height: 1.45;
+    }
+
+    .slide-matrix .matrix-panel {
+      padding: 18px 22px 20px;
+    }
+
+    .slide-matrix .matrix-table th:first-child,
+    .slide-matrix .matrix-table td:first-child,
+    .slide-matrix .matrix-table th,
+    .slide-matrix .matrix-table td {
+      width: 25%;
+    }
+
+    .slide-matrix .matrix-table th {
+      text-align: center;
+      padding-bottom: 6px;
+    }
+
+    .slide-matrix .matrix-table tbody td {
+      padding: 6px;
+    }
+
+    .slide-matrix .matrix-path strong {
+      font-size: 0.88em;
+    }
+
+    .slide-matrix .matrix-table th.col-local,
+    .slide-matrix .matrix-table th.col-shared,
+    .slide-matrix .matrix-table th.col-dbx {
+      background: transparent;
     }
   </style>
 </head>
@@ -1037,41 +1186,43 @@
           </div>
 
           <div class="body">
-            <div class="eyebrow">Agenda de la session</div>
-            <div class="agenda-stack">
-              <div class="agenda-item">
-                <div class="agenda-index">01</div>
-                <div class="agenda-content">
-                  <p class="agenda-title">Ce que couvre MLflow</p>
-                  <p class="agenda-copy">Tracking, Models, Registry et Serving sur un même cas d’usage.</p>
+            <div class="panel" style="height: 100%; display: grid; align-content: start; gap: 20px; padding: 34px 38px;">
+              <div class="eyebrow">Agenda de la session</div>
+              <div class="agenda-stack">
+                <div class="agenda-item">
+                  <div class="agenda-index">01</div>
+                  <div class="agenda-content">
+                    <p class="agenda-title">Ce que couvre MLflow</p>
+                    <p class="agenda-copy">Tracking, Models, Registry et Serving sur un même cas d’usage.</p>
+                  </div>
                 </div>
-              </div>
-              <div class="agenda-item">
-                <div class="agenda-index">02</div>
-                <div class="agenda-content">
-                  <p class="agenda-title">Étapes possibles d’un projet ML</p>
-                  <p class="agenda-copy">EXP 01 à 05, VAL 06 à 07, PROD 08 à 09: des étapes successives du projet.</p>
+                <div class="agenda-item">
+                  <div class="agenda-index">02</div>
+                  <div class="agenda-content">
+                    <p class="agenda-title">Étapes possibles d’un projet ML</p>
+                    <p class="agenda-copy">EXP 01 à 05, VAL 06 à 07, PROD 08 à 09: des étapes successives du projet.</p>
+                  </div>
                 </div>
-              </div>
-              <div class="agenda-item">
-                <div class="agenda-index">03</div>
-                <div class="agenda-content">
-                  <p class="agenda-title">Trois modes d’exécution distincts</p>
-                  <p class="agenda-copy">Local, serveur partagé, Databricks: mêmes usages, contraintes différentes.</p>
+                <div class="agenda-item">
+                  <div class="agenda-index">03</div>
+                  <div class="agenda-content">
+                    <p class="agenda-title">Trois modes d’exécution distincts</p>
+                    <p class="agenda-copy">Local, serveur partagé, Databricks: mêmes usages, contraintes différentes.</p>
+                  </div>
                 </div>
-              </div>
-              <div class="agenda-item">
-                <div class="agenda-index">04</div>
-                <div class="agenda-content">
-                  <p class="agenda-title">Comparer ce qui change selon le mode</p>
-                  <p class="agenda-copy">Une matrice simple pour voir ce qui change selon le mode.</p>
+                <div class="agenda-item">
+                  <div class="agenda-index">04</div>
+                  <div class="agenda-content">
+                    <p class="agenda-title">Comparer ce qui change selon le mode</p>
+                    <p class="agenda-copy">Une matrice simple pour voir ce qui change selon le mode.</p>
+                  </div>
                 </div>
-              </div>
-              <div class="agenda-item">
-                <div class="agenda-index">05</div>
-                <div class="agenda-content">
-                  <p class="agenda-title">Démo guidée</p>
-                  <p class="agenda-copy">Dérouler les notebooks clés de l’exploration à la mise en service.</p>
+                <div class="agenda-item">
+                  <div class="agenda-index">05</div>
+                  <div class="agenda-content">
+                    <p class="agenda-title">Démo guidée</p>
+                    <p class="agenda-copy">Dérouler les notebooks clés de l’exploration à la mise en service.</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1096,31 +1247,26 @@
             <div class="component-grid">
               <div class="component-card">
                 <div class="neutral-kicker">01 · Tracking</div>
-                <p class="panel-title">Tracer les expériences.</p>
+                <p class="panel-title" style="color: var(--cyan)">Tracer les expériences.</p>
                 <p class="panel-copy">Paramètres, métriques, artefacts, datasets: tout ce qu’un run doit laisser derrière lui pour être relu et comparé.</p>
               </div>
               <div class="component-card">
                 <div class="neutral-kicker">02 · Models</div>
-                <p class="panel-title">Un format unifié.</p>
+                <p class="panel-title" style="color: var(--cyan)">Un format unifié.</p>
                 <p class="panel-copy">Même logique de packaging pour <strong>sklearn</strong>, <strong>PyTorch</strong>, <strong>XGBoost</strong> ou des pipelines plus personnalisés.</p>
               </div>
               <div class="component-card">
                 <div class="neutral-kicker">03 · Registry</div>
-                <p class="panel-title">Versionner et promouvoir.</p>
+                <p class="panel-title" style="color: var(--cyan)">Versionner et promouvoir.</p>
                 <p class="panel-copy">Passer du notebook solo à une mécanique de gouvernance avec validation, versionnage et promotion.</p>
               </div>
               <div class="component-card">
                 <div class="neutral-kicker">04 · Serving</div>
-                <p class="panel-title">Aller jusqu’à l’usage.</p>
+                <p class="panel-title" style="color: var(--cyan)">Aller jusqu’à l’usage.</p>
                 <p class="panel-copy">Exposer un modèle, servir une API, instrumenter les entrées et préparer le monitoring.</p>
               </div>
             </div>
 
-            <ul class="feature-list">
-              <li><code>mlflow.log_params()</code> et <code>log_metrics()</code></li>
-              <li><code>mlflow.autolog()</code> pour le logging automatique</li>
-              <li><code>mlflow.data.from_pandas()</code> pour le dataset</li>
-            </ul>
           </div>
 
           <div class="footerline">
@@ -1144,8 +1290,8 @@
                 <div class="timeline-phase">
                   <div class="stage-tag stage-exp">EXP</div>
                   <div class="timeline-meta">Notebooks 01 → 05</div>
-                  <p class="timeline-title">Explorer, entraîner, comparer.</p>
-                  <p class="timeline-copy">Le socle d’un projet ML: comprendre les données, poser des baselines, enrichir les features, tuner et sélectionner.</p>
+                  <p class="timeline-title" style="color: var(--cyan); font-size: 0.54em;">Explorer, entraîner, comparer</p>
+                  <p class="timeline-copy">Le socle d’un projet ML : préparer les données, poser les baselines, enrichir les features et tuner le modèle.</p>
                   <ul class="timeline-steps">
                     <li>01 à 03: exploration, premiers modèles, features</li>
                     <li>04 à 05: tuning, comparaison, sélection</li>
@@ -1154,7 +1300,7 @@
                 <div class="timeline-phase">
                   <div class="stage-tag stage-val">VAL</div>
                   <div class="timeline-meta">Notebooks 06 → 07</div>
-                  <p class="timeline-title">Valider et promouvoir.</p>
+                  <p class="timeline-title" style="color: var(--cyan)">Valider et promouvoir.</p>
                   <p class="timeline-copy">Une étape dédiée à la validation du modèle retenu, puis à sa promotion dans le registry.</p>
                   <ul class="timeline-steps">
                     <li>06: validation et quality checks</li>
@@ -1164,7 +1310,7 @@
                 <div class="timeline-phase">
                   <div class="stage-tag stage-prod">PROD</div>
                   <div class="timeline-meta">Notebooks 08 → 09</div>
-                  <p class="timeline-title">Servir et monitorer.</p>
+                  <p class="timeline-title" style="color: var(--cyan)">Servir et monitorer.</p>
                   <p class="timeline-copy">La phase d’usage réel: exposition du modèle, suivi des prédictions et préparation du réentraînement.</p>
                   <ul class="timeline-steps">
                     <li>08: serving et inférence</li>
@@ -1193,13 +1339,13 @@
             <div class="eyebrow">3 façons de travailler avec MLflow</div>
             <div class="triptych">
               <div class="lane mode-card">
-                <div class="mode-header">
-                  <div class="lane-tag mode-local-tag">Local</div>
+                <div class="mode-header" style="justify-content: center; margin-bottom: 8px;">
+                  <div class="matrix-header-chip mode-local-tag">LOCAL</div>
                 </div>
                 <div class="mode-track">UI: <code>http://localhost:5000</code></div>
                 <ul class="mode-list lane-copy">
                   <li>Installation simple, sans service séparé à lancer</li>
-                  <li>Traiter et organiser les runs d’exploration simplement</li>
+                  <li>Organiser les runs d’exploration facilement</li>
                   <li>UI locale immédiate</li>
                   <li>Idéal pour prise en main, POC et démo offline</li>
                 </ul>
@@ -1207,8 +1353,8 @@
               </div>
 
               <div class="lane mode-card">
-                <div class="mode-header">
-                  <div class="lane-tag mode-shared-tag">Serveur partagé</div>
+                <div class="mode-header" style="justify-content: center; margin-bottom: 8px;">
+                  <div class="matrix-header-chip mode-shared-tag">SERVEUR</div>
                 </div>
                 <div class="mode-track">UI: <code>http://&lt;host&gt;:&lt;port&gt;</code></div>
                 <ul class="mode-list lane-copy">
@@ -1221,8 +1367,8 @@
               </div>
 
               <div class="lane mode-card">
-                <div class="mode-header">
-                  <div class="lane-tag mode-dbx-tag">Databricks</div>
+                <div class="mode-header" style="justify-content: center; margin-bottom: 8px;">
+                  <div class="matrix-header-chip mode-dbx-tag">DATABRICKS</div>
                 </div>
                 <div class="mode-track">UI: <code>https://&lt;workspace&gt;</code></div>
                 <ul class="mode-list lane-copy">
@@ -1273,19 +1419,19 @@
                         </div>
                       </td>
                       <td>
-                        <div class="matrix-cell">
+                        <div class="matrix-cell cell-ok">
                           <span class="matrix-status status-ok">OK</span>
                           <p class="matrix-note">Tracking local, autolog et UI immédiate.</p>
                         </div>
                       </td>
                       <td>
-                        <div class="matrix-cell">
+                        <div class="matrix-cell cell-ok">
                           <span class="matrix-status status-ok">OK</span>
                           <p class="matrix-note">Runs partagés et visibles dans une UI commune.</p>
                         </div>
                       </td>
                       <td>
-                        <div class="matrix-cell">
+                        <div class="matrix-cell cell-ok">
                           <span class="matrix-status status-ok">OK</span>
                           <p class="matrix-note">Workspace managé et gouvernance native.</p>
                         </div>
@@ -1300,21 +1446,21 @@
                         </div>
                       </td>
                       <td>
-                        <div class="matrix-cell">
+                        <div class="matrix-cell cell-mid">
                           <span class="matrix-status status-mid">Partiel</span>
-                          <p class="matrix-note">Registry locale utile pour un POC structuré, mais peu collaborative.</p>
+                          <p class="matrix-note">Registry locale (POC), peu collaborative.</p>
                         </div>
                       </td>
                       <td>
-                        <div class="matrix-cell">
+                        <div class="matrix-cell cell-ok">
                           <span class="matrix-status status-ok">OK</span>
                           <p class="matrix-note">Registry partagée pour travailler à plusieurs.</p>
                         </div>
                       </td>
                       <td>
-                        <div class="matrix-cell">
+                        <div class="matrix-cell cell-ok">
                           <span class="matrix-status status-ok">OK</span>
-                          <p class="matrix-note">Gouvernance plus outillée et plus robuste.</p>
+                          <p class="matrix-note">Gouvernance plus outillée (Unity Catalog).</p>
                         </div>
                       </td>
                     </tr>
@@ -1327,19 +1473,19 @@
                         </div>
                       </td>
                       <td>
-                        <div class="matrix-cell">
+                        <div class="matrix-cell cell-no">
                           <span class="matrix-status status-no">Limite</span>
-                          <p class="matrix-note">Serving local possible, mais monitoring et exploitation restent très limités.</p>
+                          <p class="matrix-note">Serving local possible, suivi très limité.</p>
                         </div>
                       </td>
                       <td>
-                        <div class="matrix-cell">
+                        <div class="matrix-cell cell-mid">
                           <span class="matrix-status status-mid">Partiel</span>
-                          <p class="matrix-note">Serving faisable, plus artisanal à opérer.</p>
+                          <p class="matrix-note">Serving faisable, artisanal à opérer.</p>
                         </div>
                       </td>
                       <td>
-                        <div class="matrix-cell">
+                        <div class="matrix-cell cell-ok">
                           <span class="matrix-status status-ok">OK</span>
                           <p class="matrix-note">Terrain naturel pour serving et monitoring.</p>
                         </div>
@@ -1366,11 +1512,11 @@
           </div>
 
           <div class="body">
-            <div class="eyebrow">C’est parti</div>
-            <div class="demo-launch">
-              <div class="hero-panel">
-                <h1 class="hero-title">On lance la <span class="accent">démo</span>.</h1>
-                <p class="hero-copy">Même dataset, même fil rouge, et davantage de capacités à chaque étape du parcours MLflow.</p>
+            <div class="hero-grid">
+              <div class="hero-panel" style="display: grid; align-content: center; height: 100%;">
+                <div class="eyebrow" style="margin-bottom: 24px;">C’est parti</div>
+                <h1 class="hero-title" style="margin: 0; font-size: 1.25em;">On lance la <span class="accent">démo</span>.</h1>
+                <p class="hero-copy" style="margin-top: 22px; font-size: 0.55em; max-width: 50ch;">Même dataset, même fil rouge, et davantage de capacités à chaque étape du parcours MLflow.</p>
               </div>
             </div>
           </div>
@@ -1391,13 +1537,14 @@
       hash: true,
       controls: true,
       progress: true,
+      center: false,
       slideNumber: 'c/t',
       transition: 'convex',
       backgroundTransition: 'fade',
       width: 1280,
       height: 720,
-      margin: 0.04,
-      minScale: 0.82,
+      margin: 0.02,
+      minScale: 0.9,
       maxScale: 1.18,
     });
   </script>
